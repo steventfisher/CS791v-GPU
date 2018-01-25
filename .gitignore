@@ -1,3 +1,6 @@
+# Temporary Files
+*.*~
+
 # Compiled Object files
 *.slo
 *.lo
