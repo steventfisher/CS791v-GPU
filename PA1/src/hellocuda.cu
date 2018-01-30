@@ -51,7 +51,7 @@ number of threads per block to use.
 	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
 do {	
 	do {
-	   std::cout << "Enter the value(size of matrix) for N: ";
+	   std::cout << "Enter the value(size of matrix) for N (N <= 20000: ";
 	   std::cin >> N;
 
 	   if (N < 1) {
@@ -60,7 +60,7 @@ do {
 	   else if (N > 1000) {
  	      std::cout << "Error -- N has to be less than or equal to 1000!" << std::endl;
 	   }
-	} while ( N < 10 || N > 1000);
+	} while ( N < 10 || N > 20000);
 	
 	do {//Using a do while loop, since we want it to run at least once.
 		std::cout << "Enter number of blocks per grid that will be used in both the x and y dimensions: ";
