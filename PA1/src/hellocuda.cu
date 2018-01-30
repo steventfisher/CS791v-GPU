@@ -51,13 +51,21 @@ number of threads per block to use.
 	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
 do {	
 	do {
+<<<<<<< HEAD
 	   std::cout << "Enter the value(size of matrix) for N (N <= 20000): ";
+=======
+	   std::cout << "Enter the value(size of matrix) for N (N <= 20000: ";
+>>>>>>> bdb48b7af0d4c1cc2caeecfe9a7646b692b452dd
 	   std::cin >> N;
 
 	   if (N < 1) {
 	      std::cout << "Error -- N has to be greater than 0!" << std::endl;
 	   }
+<<<<<<< HEAD
 	   else if (N > 20000) {
+=======
+	   else if (N > 1000) {
+>>>>>>> bdb48b7af0d4c1cc2caeecfe9a7646b692b452dd
  	      std::cout << "Error -- N has to be less than or equal to 1000!" << std::endl;
 	   }
 	} while ( N < 10 || N > 20000);
@@ -226,4 +234,8 @@ Performing methods to free allocated memory
 	std::cin >> check;
 } while(check == 'c');
 	return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bdb48b7af0d4c1cc2caeecfe9a7646b692b452dd

@@ -1,3 +1,6 @@
+# Temporary Files
+*.*~
+
 # Compiled Object files
 *.slo
 *.lo
@@ -28,3 +31,5 @@
 *.app
 
 build/
+RemoteSystemsTempFiles/
+.metadata/
