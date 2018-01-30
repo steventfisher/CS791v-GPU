@@ -19,8 +19,6 @@ matgpuadd.o: ../src/matgpuadd.cu
 matcpuadd.o: ../src/matcpuadd.cu
 	$(CC) -c ../src/matcpuadd.cu -o matcpuadd.o $(INCLUDES)
 
-#matadd.o: ../src/matadd.cu
-#	$(CC) -c ../src/matadd.cu -o matadd.o $(INCLUDES)
 
 clean:
 	rm -f *.o
