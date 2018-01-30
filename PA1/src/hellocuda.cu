@@ -1,172 +1,188 @@
 /*
-  This program demonstrates the basics of working with cuda. We use
-  the GPU to add two arrays. We also introduce cuda's approach to
-  error handling and timing using cuda Events.
+  In this program we will be using the GPU to add two square matrices. 
 
-  This is the main program. You should also look at the header add.h
-  for the important declarations, and then look at add.cu to see how
-  to define functions that execute on the GPU.
+  This is the main program. You should also look at the header matgpuadd.h
+  matcpuadd.h, and matdefine.h for the important declarations, and then look
+  at matgpuadd.cu, matcpuadd.cu, and matdefine.cu to see how the methods were
+  defined.
+
+  AUTHOR: Steven Fisher
+  CLASS: CS 791-GPU Computing
+  ASSIGNMENT: PA1
  */
 
 #include <iostream>
 
-#include "add.h"
+#include "matgpuadd.h"
+#include "matcpuadd.h"
+#include "matdefine.h"
+
 
 int main() {
-  
-  // Arrays on the host (CPU)
-  int a[N], b[N], c[N];
-  
-  /*
-    These will point to memory on the GPU - notice the correspondence
-    between these pointers and the arrays declared above.
-   */
-  int *dev_a, *dev_b, *dev_c;
+/*
+This section is for the declaration of the variables that will be used
+in our implementation of the matrix addition.
+*/
 
-  /*
-    These calls allocate memory on the GPU (also called the
-    device). This is similar to C's malloc, except that instead of
-    directly returning a pointer to the allocated memory, cudaMalloc
-    returns the pointer through its first argument, which must be a
-    void**. The second argument is the number of bytes we want to
-    allocate.
+	int Grid_Dim_x=1, Grid_Dim_y=1;		//Grid structure values
+	int Block_Dim_x=1, Block_Dim_y=1;	//Block structure values
 
-    NB: the return value of cudaMalloc (like most cuda functions) is
-    an error code. Strictly speaking, we should check this value and
-    perform error handling if anything went wrong. We do this for the
-    first call to cudaMalloc so you can see what it looks like, but
-    for all other function calls we just point out that you should do
-    error checking.
+	int numThreads_x;  			// number of threads available in device, each dimension
+	int numThreads_block;			// number of threads in a block
 
-    Actually, a good idea would be to wrap this error checking in a
-    function or macro, which is what the Cuda By Example book does.
-   */
-  cudaError_t err = cudaMalloc( (void**) &dev_a, N * sizeof(int));
-  if (err != cudaSuccess) {
-    std::cerr << "Error: " << cudaGetErrorString(err) << std::endl;
-    exit(1);
-  }
-  cudaMalloc( (void**) &dev_b, N * sizeof(int));
-  cudaMalloc( (void**) &dev_c, N * sizeof(int));
+	int N = 10;  				// size of array in each dimension
+	int *a,*b,*c,*d;
+	int *dev_a, *dev_b, *dev_c;
+	int size;					// number of elements in the matrices
 
-  // These lines just fill the host arrays with some data so we can do
-  // something interesting. Well, so we can add two arrays.
-  for (int i = 0; i < N; ++i) {
-    a[i] = i;
-    b[i] = i;
-  }
+	cudaEvent_t start, stop, throughstart, throughstop;     		// using cuda events to measure time
+	float elapsed_time_gpu, elapsed_time_cpu, through_total;
 
-  /*
-    The following code is responsible for handling timing for code
-    that executes on the GPU. The cuda approach to this problem uses
-    events. For timing purposes, an event is essentially a point in
-    time. We create events for the beginning and end points of the
-    process we want to time. When we want to start timing, we call
-    cudaEventRecord.
+/*
+This section specifies the size limitations and allows the user to
+specify the size of the matrices, the number of blocks used and the
+number of threads per block to use.
+*/
 
-    In this case, we want to record the time it takes to transfer data
-    to the GPU, perform some computations, and transfer data back.
-  */
-  cudaEvent_t start, end;
-  cudaEventCreate(&start);
-  cudaEventCreate(&end);
+	std::cout << "Maximum number of threads per block = 1024" << std::endl;
+	std::cout << "Maximum sizes of the x and y dimensions of the thread block = 1024" << std::endl;
+	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
+	
+	std::cout << "Enter the value(size of matrix) for N: ";
+	std::cin >> N;
+	
+	do {//Using a do while loop, since we want it to run at least once.
+		std::cout << "Enter number of blocks per grid that will be used in both the x and y dimensions: ";
+		std::cin >> Grid_Dim_x;
 
-  cudaEventRecord( start, 0 );
+		Grid_Dim_y = Grid_Dim_x;  // square grid
 
-  /*
-    Once we have host arrays containing data and we have allocated
-    memory on the GPU, we have to transfer data from the host to the
-    device. Again, notice the similarity to C's memcpy function.
+		std::cout << "Enter number of threads that will used per block in both the x and y dimensions, currently " << Block_Dim_x << " (Needs to be < 32): ";
+		std::cin >> Block_Dim_x;
 
-    The first argument is the destination of the copy - in this case a
-    pointer to memory allocated on the device. The second argument is
-    the source of the copy. The third argument is the number of bytes
-    we want to copy. The last argument is a constant that tells
-    cudaMemcpy the direction of the transfer.
-   */
-  cudaMemcpy(dev_a, a, N * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_b, b, N * sizeof(int), cudaMemcpyHostToDevice);
-  //cudaMemcpy(dev_c, c, N * sizeof(int), cudaMemcpyHostToDevice);
-  
-  /*
-    FINALLY we get to run some code on the GPU. At this point, if you
-    haven't looked at add.cu (in this folder), you should. The
-    comments in that file explain what the add function does, so here
-    let's focus on how add is being called. The first thing to notice
-    is the <<<...>>>, which you should recognize as _not_ being
-    standard C. This syntactic extension tells nvidia's cuda compiler
-    how to parallelize the execution of the function. We'll get into
-    details as the course progresses, but for we'll say that <<<N,
-    1>>> is creating N _blocks_ of 1 _thread_ each. Each of these
-    threads is executing add with a different data element (details of
-    the indexing are in add.cu). 
+		Block_Dim_y = Block_Dim_x;	//square blocks
 
-    In larger programs, you will typically have many more blocks, and
-    each block will have many threads. Each thread will handle a
-    different piece of data, and many threads can execute at the same
-    time. This is how cuda can get such large speedups.
-   */
-  add<<<N, 1>>>(dev_a, dev_b, dev_c);
+		numThreads_x = Grid_Dim_x * Block_Dim_x;		// total number of threads in x dimension
+		
+		numThreads_block = Block_Dim_x * Block_Dim_y;	// number of threads in a block
 
-  /*
-    Unfortunately, the GPU is to some extent a black box. In order to
-    print the results of our call to add, we have to transfer the data
-    back to the host. We do that with a call to cudaMemcpy, which is
-    just like the cudaMemcpy calls above, except that the direction of
-    the transfer (given by the last argument) is reversed. In a real
-    program we would want to check the error code returned by this
-    function.
-  */
-  cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost);
+		if (numThreads_x < N) {
+		   std::cout <<"Error -- number of threads in the x or y dimensions is less than thenumber of elements in matrix!" << std::endl;
+		}
+		else if (numThreads_block > 1024) {
+		     std::cout << "Error -- there are too many threads in block!" << std::endl;
+		}
 
-  /*
-    This is the other end of the timing process. We record an event,
-    synchronize on it, and then figure out the difference in time
-    between the start and the stop.
+	} while (numThreads_x < N || numThreads_block > 1024);
 
-    We have to call cudaEventSynchronize before we can safely _read_
-    the value of the stop event. This is because the GPU may not have
-    actually written to the event until all other work has finished.
-   */
-  cudaEventRecord( end, 0 );
-  cudaEventSynchronize( end );
+	dim3 Grid(Grid_Dim_x, Grid_Dim_y);	//Grid structure
+	dim3 Block(Block_Dim_x,Block_Dim_y);	//Number of threads per block.
 
-  float elapsedTime;
-  cudaEventElapsedTime( &elapsedTime, start, end );
+/*
+This section will dynamically allocate the memory needed
+for the matrices in both the cpu and gpu calculations.
+Here we will also be using fillMatrices from matdefine in
+order to populate our two matrices.
+*/
 
-  /*
-    Let's check that the results are what we expect.
-   */
-  for (int i = 0; i < N; ++i) {
-    if (c[i] != a[i] + b[i]) {
-      std::cerr << "Oh no! Something went wrong. You should check your cuda install and your GPU. :(" << std::endl;
+	size = N * N * sizeof(int);		// number of bytes in total in arrays, this is needed in both malloc and cudaMalloc
 
-      // clean up events - we should check for error codes here.
-      cudaEventDestroy( start );
-      cudaEventDestroy( end );
+	a = (int*) malloc(size);		// Dynamically allocates the memory for the matrices on the host
+	b = (int*) malloc(size);
+	c = (int*) malloc(size);		// this will hold the results from the GPU calculation
+	d = (int*) malloc(size);		// this will hold the results from from the CPU calculation
 
-      // clean up device pointers - just like free in C. We don't have
-      // to check error codes for this one.
-      cudaFree(dev_a);
-      cudaFree(dev_b);
-      cudaFree(dev_c);
-      exit(1);
-    }
-  }
+	cudaMalloc((void**)&dev_a, size);	// allocate the memory for the matrices on the device
+	cudaMalloc((void**)&dev_b, size);
+	cudaMalloc((void**)&dev_c, size);
 
-  /*
-    Let's let the user know that everything is ok and then display
-    some information about the times we recorded above.
-   */
-  std::cout << "Yay! Your program's results are correct." << std::endl;
-  std::cout << "Your program took: " << elapsedTime << " ms." << std::endl;
-  
-  // Cleanup in the event of success.
-  cudaEventDestroy( start );
-  cudaEventDestroy( end );
+	fillMatrices(a,b,N);			// used to generate the arrays, found in matdefine.cu
+	
+	std::cout << "Array A" << std::endl;
+	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging
+	std::cout << "Array B" << std::endl;
+	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
 
-  cudaFree(dev_a);
-  cudaFree(dev_b);
-  cudaFree(dev_c);
+/*
+In this section we will be performing the nececcary steps in
+order to run our computaion on the GPU. The cudaEventCreate is
+used to created the events for our timers. cudaMemcpy is used
+to copy the matrix from the host to the device, which is then
+used in the matgpuadd function, which used the entered results
+from before, to specify the number of blocks and the number of
+threads per block that will be used on the GPU
+*/
 
+  	cudaEventCreate(&start);     		// Creates the event for the start timer
+	cudaEventCreate(&stop);			// Creates the event for the stop timer
+	cudaEventCreate(&throughstart);		// Creates the event for the start timer for the throughput
+	cudaEventCreate(&throughstop);		// Creates the event for the stop timer for the throughput
+	
+   	cudaMemcpy(dev_a, a , size ,cudaMemcpyHostToDevice); //copies the information for matrix a to dev_a on the device
+	cudaMemcpy(dev_b, b , size ,cudaMemcpyHostToDevice);
+	
+
+	cudaEventRecord(start, 0);
+
+	cudaEventRecord(throughstart, 0); //records the start time for the throughput
+	matgpuadd<<<Grid,Block>>>(dev_a,dev_b,dev_c,N);
+	cudaEventRecord(throughstop, 0);
+	cudaEventSynchronize(throughstop); //records the stop time for the throughput
+	cudaEventElapsedTime(&through_total, throughstart, throughstop);
+	
+
+	cudaMemcpy(c,dev_c, size ,cudaMemcpyDeviceToHost); //copies the results from the addition from the device to the host
+
+	cudaEventRecord(stop, 0);     	// records the stop time
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&elapsed_time_gpu, start, stop ); //stores the elapsed time for the gpu
+	
+	std::cout << "Time needed to calculate the results on the GPU: " << elapsed_time_gpu << " ms." << std::endl;  // print out elapsed time for gpu
+	std::cout << "Throughput for gpu: " << N * N * through_total * 1000 << " calculations per second" << std::endl; // print out throughput for gpu.
+
+/*
+In this section we will be perofming the necessary steps
+to run the sequential computations on the CPU
+*/
+
+	cudaEventRecord(start, 0);	// records the start time
+
+	matcpuadd(a,b,d,N);		// do calculation on the cpu
+
+	cudaEventRecord(stop, 0);     	// records the end time end time for cpu calculation
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&elapsed_time_cpu, start, stop ); //store the elaspsed time for the cpu
+
+	std::cout << "Time needed to calculate the results on the CPU: " << elapsed_time_cpu << " ms." << std::endl;  // print out elapsed time for the cpu
+
+        std::cout << std::endl; 
+	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
+
+	for(int i = 0;i < N*N;i++) {  // checking if the matrix from the gpu is the same as cpu
+		if (c[i] != d[i] ) { 
+			std::cout << "ERROR results are not equal" << std::endl;
+			break;
+		}
+	}
+	
+	//prints out the speedup for the gpu as compared to cpu.
+	std::cout << "Speedup on GPU as compared to CPU= " << ((float) elapsed_time_cpu / (float) elapsed_time_gpu) << std::endl; 
+
+/*
+Performing methods to free allocated memory
+*/
+	free(a);
+	free(b);
+	free(c);
+	free(d);
+	cudaFree(dev_a);
+	cudaFree(dev_b);
+	cudaFree(dev_c);
+
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
+	cudaEventDestroy(throughstart);
+	cudaEventDestroy(throughstop);
+
+	return 0;
 }

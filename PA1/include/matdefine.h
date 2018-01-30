@@ -3,13 +3,12 @@
   multiple files. 
  */
 
-#ifndef ADD_H_
-#define ADD_H_
+#ifndef MATDEFINE_H_
+#define MATDEFINE_H_
 
-// This is the number of elements we want to process.
-#define N 1000000
 
 // This is the declaration of the function that will execute on the GPU.
-__global__ void add(int*, int*, int*);
+void fillMatrices(int *, int *, int);
+void printMatrix(int *, int);
 
-#endif // ADD_H_
+#endif // MATDEFINE_H_
