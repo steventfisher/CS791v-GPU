@@ -1,0 +1,13 @@
+/*
+  This header demonstrates how we build cuda programs spanning
+  multiple files. 
+ */
+
+#ifndef MATCPUADD_H_
+#define MATCPUADD_H_
+
+
+// This is the declaration of the function that will execute on the CPU.
+void matcpuadd(int *, int *, int *, int);
+
+#endif // MATCPUADD_H_
