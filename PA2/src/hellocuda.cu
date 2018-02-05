@@ -93,7 +93,8 @@ order to populate our two matrices.
 	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
-	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
+//	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
+	d = (int*) malloc(N * N * sizeof(int));
 	
 	fillMatrices(a,b,N);			// used to generate the arrays, found in matdefine.cu
 	
@@ -112,14 +113,16 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-	matgpumult<<<Grid,Block>>>(a,b,c,N * N);
+	matgpumult<<<Grid,Block>>>(a,b,c,N);
+        std::cout << "Array C" << std::endl;
+	printMatrix(c, N);
 
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
 
-	matcpumult(a,b,d,N * N);		// do calculation on the cpu
+	matcpumult(a,b,d,N);		// do calculation on the cpu
 
         std::cout << std::endl; 
 	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
@@ -137,7 +140,7 @@ Performing methods to free allocated memory
 	cudaFree(a);
 	cudaFree(b);
 	cudaFree(c);
-	cudaFree(d);
+	free(d);
 
 	std::cout << "To continue type c, to end press ctrl-z" << std::endl;
 	std::cin >> check;

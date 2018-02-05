@@ -4,12 +4,10 @@
 
 void fillvect(int *a, int *b, int N) {
 
-	int rows, columns;
+	int i;
 
-	srand(1);				// for repeatability
-	for(rows=0; rows < N; rows++)		// load arrays with some numbers
-	   for(columns=0; columns < N; columns++) {
-		a[rows * N + columns] = rand() % 10;
-		b[rows * N + columns] = rand() % 10;
-	}
+	srand(1);			
+	for(i=0; i < N; i++)		// load arrays with random numbers
+	   a[i] = rand() % 10;
+	   b[i] = rand() % 10;
 }
