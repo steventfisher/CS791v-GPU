@@ -3,11 +3,11 @@
   multiple files. 
  */
 
-#ifndef MATCPUADD_H_
-#define MATCPUADD_H_
+#ifndef MATCPUMULT_H_
+#define MATCPUMULT_H_
 
 
 // This is the declaration of the function that will execute on the CPU.
-void matcpuadd(int *, int *, int *, int);
+void matcpumult(int *, int *, int *, int);
 
-#endif // MATCPUADD_H_
+#endif // MATCPUMULT_H_

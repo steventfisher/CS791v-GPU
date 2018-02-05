@@ -8,13 +8,13 @@
 
   AUTHOR: Steven Fisher
   CLASS: CS 791-GPU Computing
-  ASSIGNMENT: PA1
+  ASSIGNMENT: PA2
  */
 
 #include <iostream>
 
-#include "matgpuadd.h"
-#include "matcpuadd.h"
+#include "matgpumult.h"
+#include "matcpumult.h"
 #include "matdefine.h"
 
 
@@ -33,13 +33,7 @@ in our implementation of the matrix addition.
 	int numThreads_block;			// number of threads in a block
 
 	int N = 10;  				// size of array in each dimension
-	int *a,*b,*c,*d, *e;
-	int *dev_a, *dev_b, *dev_c, *dev_d;
-	int size;					// number of elements in the matrices
-
-	cudaEvent_t start, stop, start_stride, stop_stride, throughstart, throughstop, start_mem_cpy, stop_mem_cpy;     		// using cuda events to measure time
-	float elapsed_time_gpu, elapsed_time_cpu, through_total, elapsed_mem, elapsed_stride;
-
+	int *a,*b,*c,*d;
 /*
 This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
@@ -96,19 +90,11 @@ Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
 
-	size = N * N * sizeof(int);		// number of bytes in total in arrays, this is needed in both malloc and cudaMalloc
-
-	a = (int*) malloc(size);		// Dynamically allocates the memory for the matrices on the host
-	b = (int*) malloc(size);
-	c = (int*) malloc(size);		// this will hold the results from the GPU calculation
-	d = (int*) malloc(size);		// this will hold the results from from the CPU calculation
-	e = (int*) malloc(size);
-
-	cudaMalloc((void**)&dev_a, size);	// allocate the memory for the matrices on the device
-	cudaMalloc((void**)&dev_b, size);
-	cudaMalloc((void**)&dev_c, size);
-	cudaMalloc((void**)&dev_d, size);
-
+	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
+	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
+	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
+	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
+	
 	fillMatrices(a,b,N);			// used to generate the arrays, found in matdefine.cu
 	
 	std::cout << "Array A" << std::endl;
@@ -126,65 +112,14 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-  	cudaEventCreate(&start);     		// Creates the event for the start timer
-	cudaEventCreate(&stop);			// Creates the event for the stop timer
-	cudaEventCreate(&throughstart);		// Creates the event for the start timer for the throughput
-	cudaEventCreate(&throughstop);		// Creates the event for the stop timer for the throughput
-  	cudaEventCreate(&start_stride);     		// Creates the event for the start timer
-	cudaEventCreate(&stop_stride);			// Creates the event for the stop timer
-	cudaEventCreate(&start_mem_cpy);     		// Creates the event for the start timer
-	cudaEventCreate(&stop_mem_cpy);			// Creates the event for the stop timer
-
-	cudaEventRecord(start_mem_cpy, 0);
- 	cudaMemcpy(dev_a, a , size ,cudaMemcpyHostToDevice); //copies the information for matrix a to dev_a on the device
-	cudaMemcpy(dev_b, b , size ,cudaMemcpyHostToDevice);
-	cudaEventRecord(stop_mem_cpy, 0);
-	cudaEventSynchronize(stop_mem_cpy);
-	cudaEventElapsedTime(&elapsed_mem, start_mem_cpy, stop_mem_cpy);
-
-	cudaEventRecord(start, 0);
-	cudaEventRecord(throughstart, 0); //records the start time for the throughput
-	matgpuadd<<<Grid,Block>>>(dev_a,dev_b,dev_c,N);
-	cudaEventRecord(throughstop, 0);
-	cudaEventSynchronize(throughstop); //records the stop time for the throughput
-	cudaEventElapsedTime(&through_total, throughstart, throughstop);
-	
-
-	cudaMemcpy(c,dev_c, size ,cudaMemcpyDeviceToHost); //copies the results from the addition from the device to the host
-
-	cudaEventRecord(stop, 0);     	// records the stop time
-	cudaEventSynchronize(stop);
-	cudaEventElapsedTime(&elapsed_time_gpu, start, stop ); //stores the elapsed time for the gpu
-	
-
-
-	cudaEventRecord(start_stride, 0);
-	matgpuadd_stride<<<Grid,Block>>>(dev_a,dev_b,dev_d,N);
-	cudaEventRecord(stop_stride, 0);
-	cudaEventSynchronize(stop_stride);
-
-	cudaMemcpy(e,dev_d, size ,cudaMemcpyDeviceToHost); //copies the results from the addition from the device to the host
-	cudaEventElapsedTime(&elapsed_stride, start_stride, stop_stride);
-
-	std::cout << "Time needed to calculate the results on the GPU: " << elapsed_time_gpu + elapsed_mem << " ms." << std::endl;  // print out elapsed time for gpu
-	std::cout << "Throughput for gpu: " << N * N * through_total * 1000 << " calculations per second" << std::endl; // print out throughput for gpu.
-	std::cout << "Time needed to calculate with striding: " << elapsed_stride + elapsed_mem << " ms." << std::endl;
-	
+	matgpumult<<<Grid,Block>>>(a,b,c,N * N);
 
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
 
-	cudaEventRecord(start, 0);	// records the start time
-
-	matcpuadd(a,b,d,N);		// do calculation on the cpu
-
-	cudaEventRecord(stop, 0);     	// records the end time end time for cpu calculation
-	cudaEventSynchronize(stop);
-	cudaEventElapsedTime(&elapsed_time_cpu, start, stop ); //store the elaspsed time for the cpu
-
-	std::cout << "Time needed to calculate the results on the CPU: " << elapsed_time_cpu << " ms." << std::endl;  // print out elapsed time for the cpu
+	matcpumult(a,b,d,N * N);		// do calculation on the cpu
 
         std::cout << std::endl; 
 	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
@@ -196,32 +131,14 @@ to run the sequential computations on the CPU
 		}
 	}
 	
-	//prints out the speedup for the gpu as compared to cpu.
-	std::cout << "Speedup on GPU as compared to CPU without Stride= " << ((float) elapsed_time_cpu / ((float) elapsed_time_gpu + (float) elapsed_mem)) << std::endl;
-	std::cout << "Speedup on GPU as compared to CPU with Stride= " << ((float) elapsed_time_cpu / ((float) elapsed_stride + (float) elapsed_mem)) << std::endl;
-
-
 /*
 Performing methods to free allocated memory
 */
-	free(a);
-	free(b);
-	free(c);
-	free(d);
-	free(e);
-	cudaFree(dev_a);
-	cudaFree(dev_b);
-	cudaFree(dev_c);
-	cudaFree(dev_d);
+	cudaFree(a);
+	cudaFree(b);
+	cudaFree(c);
+	cudaFree(d);
 
-	cudaEventDestroy(start);
-	cudaEventDestroy(stop);
-	cudaEventDestroy(throughstart);
-	cudaEventDestroy(throughstop);
-	cudaEventDestroy(start_stride);
-	cudaEventDestroy(stop_stride);
-	cudaEventDestroy(start_mem_cpy);
-	cudaEventDestroy(stop_mem_cpy);	
 	std::cout << "To continue type c, to end press ctrl-z" << std::endl;
 	std::cin >> check;
 } while(check == 'c');

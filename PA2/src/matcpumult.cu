@@ -1,13 +1,18 @@
 
-#include "matcpuadd.h"
+#include "matcpumult.h"
 
-void matcpuadd(int *a, int *b, int *c, int N) {
+void matcpumult(int *a, int *b, int *d, int N) {
 
-  int rows, columns;
+  int i, j, k;
+  int sum;
 
-  for(rows=0; rows < N; rows++)  { // row of a
-	  for(columns=0; columns < N; columns++) { // column of b
-          	c[rows * N + columns]= a[rows * N + columns] + b[rows * N + columns];
+  for(i = 0; i < N; ++i)  { // row of a
+	  for(j = 0; j < N; ++j) { // column of b
+	      sum = 0;
+	      for(k = 0; k < N; ++k){
+	          sum += a[i * N + k] + b[k * N + j];
+	      }
+	      d[i * N + j] = sum;
 	  }
   }
 }
