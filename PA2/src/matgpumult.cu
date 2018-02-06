@@ -1,12 +1,17 @@
 
 #include "matgpumult.h"
 
-__global__ void matgpumult(int *a, int *b, int *re, int N) {
-    int k;
-    int sum = 0;
-    
-    for(k = 0; k < N; k++) {
-	sum +=  a[threadIdx.y * N + k] * b[k * N + threadIdx.x];
+__global__ void matgpumult(int *a, int *b, int *c, int N) {
+    int col = blockIdx.x*blockDim.x + threadIdx.x;
+    int row = blockIdx.y*blockDim.y + threadIdx.y;
+
+    //int sum = 0;
+    if(col < N && row < N)
+    {
+	int sum = 0;
+        for(int k = 0; k < N; ++k) {
+	    sum +=  (a[row * N + k] * b[k * N + col]);
+        }
+        c[row * N + col] = sum;
     }
-    re[threadIdx.y * N + threadIdx.x] = sum;
 }

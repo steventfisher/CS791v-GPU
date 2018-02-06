@@ -32,7 +32,7 @@ in our implementation of the matrix addition.
 	int numThreads_x;  			// number of threads available in device, each dimension
 	int numThreads_block;			// number of threads in a block
 
-	int N = 10;  				// size of array in each dimension
+	int N = 8;  				// size of array in each dimension
 	int *a,*b,*c,*d;
 /*
 This section specifies the size limitations and allows the user to
@@ -43,18 +43,18 @@ number of threads per block to use.
 	std::cout << "Maximum number of threads per block = 1024" << std::endl;
 	std::cout << "Maximum sizes of the x and y dimensions of the thread block = 1024" << std::endl;
 	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
-do {	
+
 	do {
 	   std::cout << "Enter the value(size of matrix) for N (N <= 20000): ";
 	   std::cin >> N;
 
-	   if (N < 1) {
-	      std::cout << "Error -- N has to be greater than 0!" << std::endl;
+	   if (N < 8) {
+	      std::cout << "Error -- N has to be greater than 10!" << std::endl;
 	   }
 	   else if (N > 20000) {
- 	      std::cout << "Error -- N has to be less than or equal to 1000!" << std::endl;
+ 	      std::cout << "Error -- N has to be less than or equal to 20000!" << std::endl;
 	   }
-	} while ( N < 10 || N > 20000);
+	} while ( N < 5 || N > 20000);
 	
 	do {//Using a do while loop, since we want it to run at least once.
 		std::cout << "Enter number of blocks per grid that will be used in both the x and y dimensions: ";
@@ -93,8 +93,8 @@ order to populate our two matrices.
 	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
-//	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
-	d = (int*) malloc(N * N * sizeof(int));
+	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
+	//d = (int*) malloc(N * N * sizeof(int));
 	
 	fillMatrices(a,b,N);			// used to generate the arrays, found in matdefine.cu
 	
@@ -114,6 +114,7 @@ threads per block that will be used on the GPU
 */
 
 	matgpumult<<<Grid,Block>>>(a,b,c,N);
+	cudaDeviceSynchronize();
         std::cout << "Array C" << std::endl;
 	printMatrix(c, N);
 
@@ -123,6 +124,8 @@ to run the sequential computations on the CPU
 */
 
 	matcpumult(a,b,d,N);		// do calculation on the cpu
+        std::cout << "Array D" << std::endl;
+	printMatrix(d, N);	
 
         std::cout << std::endl; 
 	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
@@ -140,10 +143,11 @@ Performing methods to free allocated memory
 	cudaFree(a);
 	cudaFree(b);
 	cudaFree(c);
-	free(d);
+	cudaFree(d);
+	//free(d);
 
-	std::cout << "To continue type c, to end press ctrl-z" << std::endl;
-	std::cin >> check;
-} while(check == 'c');
+//	std::cout << "To continue type c, to end press ctrl-z" << std::endl;
+//	std::cin >> check;
+//} while(check == 'c');
 	return 0;
 }
