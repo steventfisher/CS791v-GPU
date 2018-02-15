@@ -3,11 +3,11 @@
   multiple files. 
  */
 
-#ifndef MATGPUMULT_H_
-#define MATGPUMULT_H_
+#ifndef KNNCPU_H_
+#define KNNCPU_H_
 
 
 // This is the declaration of the function that will execute on the GPU.
-__global__ void matgpumult(int *, int *, int *, int);
+__global__ void knncpu(int *, int *, int *, int);
 
-#endif // MATGPUMULT_H_
+#endif // KNNCPU_H_
