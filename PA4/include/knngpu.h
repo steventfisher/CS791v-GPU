@@ -3,12 +3,11 @@
   multiple files. 
  */
 
-#ifndef MATDEFINE_H_
-#define MATDEFINE_H_
+#ifndef KNNGPU_H_
+#define KNNGPU_H_
 
 
 // This is the declaration of the function that will execute on the GPU.
-void fillMatrices(int *, int *, int);
-void printMatrix(int *, int);
+__global__ void knngpu(int *, int *, int);
 
-#endif // MATDEFINE_H_
+#endif // KNNGPU_H_

@@ -19,11 +19,11 @@ if __name__ == '__main__':
     __syncthreads();
     
     float tmpdist = 0;
-    if(x < Size && y < Size){
-       tmpdist = -99999;
-       if (A[x + y*Size + 2] == -99999) {
+    for (int i = x; i < Size; i+= blockDim.x*gridDim.x){
+       tmpdist = 0.0;
+       if (A[i] == -99999) {
            for (int k = 0; k < Size; ++k) {
-               if(k != y*Size + 1){
+               if(k != i){
                  for (int j = 0; j < Size; ++j) {
                      tmpdist += 2;
                  }

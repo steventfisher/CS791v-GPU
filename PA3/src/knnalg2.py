@@ -19,20 +19,8 @@ if __name__ == '__main__':
     __syncthreads();
     
     float tmpdist = 0;
-    if(x < Size && y < Size){
-       tmpdist = -99999;
-       if (A[x + y*Size + 2] == -99999) {
-           for (int k = 0; k < Size; ++k) {
-               if(k != y*Size + 1){
-                 for (int j = 0; j < Size; ++j) {
-                     tmpdist += 2;
-                 }
-               }
-               __syncthreads();
-               //B[k] = sqrt((float) tmpdist);
-               B[k] = tmpdist;
-            }            
-       }
+    for(int i = 1; i < Size*Size; i += 1){
+       B[i] = 2;
     }
     
   
@@ -103,7 +91,7 @@ if __name__ == '__main__':
     startgpu.record()
     startgpu.synchronize()
     kernel = mod.get_function("knnGpu")
-    kernel(gpuarray, gpukarray, gpusize, grid = (GGRID, GGRID), block = (TILE,TILE,1))
+    kernel(gpuarray, gpukarray, gpusize, grid = (GGRID, 1), block = (TILE,1,1))
     endgpu.record()
     endgpu.synchronize()
     gputotal = startgpu.time_till(endgpu)
