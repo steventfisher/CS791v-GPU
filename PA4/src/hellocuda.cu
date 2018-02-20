@@ -8,14 +8,14 @@
 
   AUTHOR: Steven Fisher
   CLASS: CS 791-GPU Computing
-  ASSIGNMENT: PA3
+  ASSIGNMENT: PA2
  */
 
 #include <iostream>
 
-#include "knngpu.h"
-#include "knncpu.h"
-#include "knndefine.h"
+#include "matgpumult.h"
+#include "matcpumult.h"
+#include "matdefine.h"
 
 
 int main() {
@@ -45,16 +45,16 @@ do{
 	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
 
 	do {
-	   std::cout << "Enter the value(size of matrix) for N (5-129): ";
+	   std::cout << "Enter the value(size of matrix) for N (N <= 20000): ";
 	   std::cin >> N;
 
-	   if (N < 5) {
-	      std::cout << "Error -- N has to be greater than 5!" << std::endl;
+	   if (N < 10) {
+	      std::cout << "Error -- N has to be greater than 10!" << std::endl;
 	   }
-	   else if (N > 129) {
- 	      std::cout << "Error -- N has to be less than or equal to 129!" << std::endl;
+	   else if (N > 20000) {
+ 	      std::cout << "Error -- N has to be less than or equal to 20000!" << std::endl;
 	   }
-	} while ( N < 5 || N > 129);
+	} while ( N < 10 || N > 20000);
 	
 	do {//Using a do while loop, since we want it to run at least once.
 		std::cout << "Enter number of blocks per grid that will be used in both the x and y dimensions: ";
@@ -93,9 +93,10 @@ order to populate our two matrices.
 	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
+	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
 	//d = (int*) malloc(N * N * sizeof(int));
 	
-	fillMatrices(c,b,N);			// used to generate the arrays
+	fillMatrices(a,b,N);			// used to generate the arrays, found in matdefine.cu
 	
 	std::cout << "Array A" << std::endl;
 	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging

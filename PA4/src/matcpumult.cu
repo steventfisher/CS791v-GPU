@@ -1,11 +1,10 @@
 
-#include "knncpu.h"
+#include "matcpumult.h"
 
-void knncpu(int *a, int *b, int N) {
+void matcpumult(int *a, int *b, int *d, int N) {
 
   int i, j, k;
-  int tmpdst = 0;
-  int tmp = 0;
+  int sum;
 
   for(i = 0; i < N; i++)  { // row of a
 	  for(j = 0; j < N; j++) { // column of b
