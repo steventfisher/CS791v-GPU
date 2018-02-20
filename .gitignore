@@ -33,3 +33,4 @@
 build/
 RemoteSystemsTempFiles/
 .metadata/
+.#*.cu
