@@ -99,13 +99,19 @@ order to populate our two matrices.
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
 	//d = (int*) malloc(N * N * sizeof(int));
 	
-	fillMatrices(c,b,N);			// used to generate the arrays
+	fillMatrices(a,b,N);			// used to generate the arrays
 	
 	std::cout << "Array A" << std::endl;
 	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging
 	std::cout << "Array B" << std::endl;
 	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
+<<<<<<< HEAD
+
+	
+
+=======
 */
+>>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
 /*
 In this section we will be performing the nececcary steps in
 order to run our computaion on the GPU. The cudaEventCreate is
@@ -115,18 +121,32 @@ used in the matgpuadd function, which used the entered results
 from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
+<<<<<<< HEAD
+/*
+	matgpumult<<<Grid,Block>>>(a,b,c,N);
+	cudaDeviceSynchronize();
+        std::cout << "Array C" << std::endl;
+	printMatrix(c, N);
+*/
+=======
 
 /*	matgpumult<<<Grid,Block>>>(a,b,c,N);
 	cudaDeviceSynchronize();
         std::cout << "Array C" << std::endl;
 	printMatrix(c, N);
 /*
+>>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
+<<<<<<< HEAD
+/*
+	matcpumult(a,b,d,N);		// do calculation on the cpu
+=======
 
 /*	matcpumult(a,b,d,N);		// do calculation on the cpu
+>>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
         std::cout << "Array D" << std::endl;
 	printMatrix(d, N);	
 
