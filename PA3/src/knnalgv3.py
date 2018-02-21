@@ -14,12 +14,12 @@ if __name__ == '__main__':
    #include <math.h>
     __global__ void knnGpu(float *A, float *B, int Size)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y*blockDim.y;
+    //int x = threadIdx.x + blockIdx.x * blockDim.x;
+    //int y = threadIdx.y + blockIdx.y*blockDim.y;
     __syncthreads();
     
     float tmpdist = 0;
-    for (int i = x; i < Size; i+= blockDim.x*gridDim.x){
+    for (int i = blockIdx.x*blockDim.x + threadIdx.x; i < Size*Size; i+= blockDim.x*gridDim.x){
        tmpdist = 0.0;
        if (A[i] == -99999) {
            for (int k = 0; k < Size; ++k) {

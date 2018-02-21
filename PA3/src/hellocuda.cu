@@ -33,7 +33,8 @@ in our implementation of the matrix addition.
 	int numThreads_block;			// number of threads in a block
 
 	int N = 8;  				// size of array in each dimension
-	int *a,*b,*c,*d;
+	char *a;
+	//int *b,*c,*d;
 /*
 This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
@@ -79,6 +80,9 @@ do{
 		}
 
 	} while (numThreads_x < N || numThreads_block > 1024);
+	
+	a = (char *) malloc(N*N);
+	readCsv(*a, N);
 
 	dim3 Grid(Grid_Dim_x, Grid_Dim_y);	//Grid structure
 	dim3 Block(Block_Dim_x,Block_Dim_y);	//Number of threads per block.
@@ -90,7 +94,7 @@ Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
 
-	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
+/*	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
 	//d = (int*) malloc(N * N * sizeof(int));
@@ -101,7 +105,7 @@ order to populate our two matrices.
 	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging
 	std::cout << "Array B" << std::endl;
 	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
-
+*/
 /*
 In this section we will be performing the nececcary steps in
 order to run our computaion on the GPU. The cudaEventCreate is
@@ -112,17 +116,17 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-	matgpumult<<<Grid,Block>>>(a,b,c,N);
+/*	matgpumult<<<Grid,Block>>>(a,b,c,N);
 	cudaDeviceSynchronize();
         std::cout << "Array C" << std::endl;
 	printMatrix(c, N);
-
+/*
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
 
-	matcpumult(a,b,d,N);		// do calculation on the cpu
+/*	matcpumult(a,b,d,N);		// do calculation on the cpu
         std::cout << "Array D" << std::endl;
 	printMatrix(d, N);	
 
@@ -135,15 +139,16 @@ to run the sequential computations on the CPU
 			break;
 		}
 	}
-	
+*/	
 /*
 Performing methods to free allocated memory
 */
-	cudaFree(a);
+/*	cudaFree(a);
 	cudaFree(b);
 	cudaFree(c);
 	cudaFree(d);
-
+*/
+	free(a);
 	std::cout << "To continue type c, to end press q" << std::endl;
 	std::cin >> check;
 } while(check == 'c');

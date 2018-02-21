@@ -34,3 +34,4 @@ build/
 RemoteSystemsTempFiles/
 .metadata/
 .#*.cu
+\#*.cu
