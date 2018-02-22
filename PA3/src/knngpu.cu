@@ -5,12 +5,11 @@
 __global__ void knngpu(float *a, float *b, int N)
 {
 	
-  int i, j, k, l, m;
+  int i, j, k, l;
   float tmpdst = 0;
-  //int q = 3;
-  //int count = 0;
+  int q = 5;
+  int count = 0;
   float tmp = 0;
-  float c[N];
 
   for(i = threadIdx.x + blockDim.x*blockIdx.x; i < N; i += blockDim.x*gridDim.x){
       for(j = threadIdx.y + blockDim.x * blockIdx.y; j < N; j += blockDim.y*gridDim.y){
@@ -26,10 +25,22 @@ __global__ void knngpu(float *a, float *b, int N)
               }
 	      for(k = 0; k < N; ++k){
                   for(l = 0; l < N; ++l){
-                      if(b[j] > b[k]){
+                      if(b[l] > b[k]){
+                          tmpdst = b[k];
+                          b[k] = b[l];
+                          b[l] = tmpdst;
                       }
                   }
+              }
+              tmpdst = 0;
+              for(k = 0; k < N; ++k){
+                  if(b[k] != 0 && count < q){
+                      tmpdst += b[k];
+		      count += 1;
+                  } 
               }	      
+              a[i*N + j] = tmpdst/q;
+
 	  }
       }
       

@@ -126,7 +126,7 @@ threads per block that will be used on the GPU
 	cudaMemcpy(d, dev_b, N*sizeof(float), cudaMemcpyDeviceToHost);
 	printMatrix(c, N);
 	std::cout << "Array dev_b" << std::endl;
-        std::sort(d, d+N);
+        //std::sort(d, d+N);
 	printVector(d, N);
 
 
