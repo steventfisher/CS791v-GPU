@@ -23,7 +23,7 @@ void knncpu(float *a, float *b, int N) {
 		  }
 		  b[k] = sqrt(tmp);
 	      }
-	      std::cout << "tmp: " << tmp << std::endl;
+//	      std::cout << "tmp: " << tmp << std::endl;
 	      std::sort(b, b + N);
 	      tmpdst = 0;
 	      for(m = 0; m < N; ++m){
