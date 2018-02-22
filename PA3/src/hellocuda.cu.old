@@ -34,6 +34,7 @@ in our implementation of the matrix addition.
 
 	int N = 8;  				// size of array in each dimension
 	float *a,*b,*c,*d;
+	float *dev_a, *dev_b;
 /*
 This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
@@ -90,20 +91,23 @@ Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
 
-        cudaMallocManaged( (void**) &a, N * N * sizeof(float));
-        cudaMallocManaged( (void**) &b, N * sizeof(float));
-        cudaMallocManaged( (void**) &c, N * N * sizeof(float));
-        cudaMallocManaged( (void**) &d, N * sizeof(float));
+	cudaMalloc( (void**) &dev_a, N * N * sizeof(float));
+	cudaMalloc( (void**) &dev_b, N * sizeof(float));
+	a = (float*) malloc(N * N * sizeof(float));
+	b = (float*) malloc(N * sizeof(float));
+	c = (float*) malloc(N * N * sizeof(float));
+	d = (float*) malloc(N * sizeof(float));
 
 	readCsv(a, N);
 	std::cout << "Mat A" << std::endl;
 	printMatrix(a, N);     // used to display matrix A after reading CSV
 	randNan(a, N);
-	copyMatrix(a, c, N);
 	std::cout << "Modified A" << std::endl;
 	printMatrix(a, N);     // used to display matrix A after modifying values in column 2
-        printMatrix(c,N);
 	fillMatrices(b,N);			// used to generate the arrays
+	//fillMatrices(c,d,N);
+	cudaMemcpy(dev_a, a, N*N*sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_b, b, N*sizeof(float), cudaMemcpyHostToDevice);
 
 /*
 In this section we will be performing the nececcary steps in
@@ -115,13 +119,16 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-	knngpu<<<Grid,Block>>>(c,d,N);
+	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
 	cudaDeviceSynchronize();
-/*        std::cout << "Array GPU A" << std::endl;
+        std::cout << "Array dev_a" << std::endl;
+	cudaMemcpy(c, dev_a, N*N*sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpy(d, dev_b, N*sizeof(float), cudaMemcpyDeviceToHost);
 	printMatrix(c, N);
-	std::cout << "Array " << std::endl;
+	std::cout << "Array dev_b" << std::endl;
+        //std::sort(d, d+N);
 	printVector(d, N);
-*/
+
 
 /*
 In this section we will be perofming the necessary steps
@@ -129,7 +136,7 @@ to run the sequential computations on the CPU
 */
 
 	knncpu(a,b,N);		// do calculation on the cpu
-//	printVector(b, N);
+	printVector(b, N);
 	std::cout << "Corrected A: " << std::endl;
 	printMatrix(a, N);
         std::cout << "GPU Array:" << std::endl;
@@ -140,26 +147,24 @@ to run the sequential computations on the CPU
 	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
 
 	for(int i = 0;i < N*N;i++) {  // checking if the matrix from the gpu is the same as cpu
-		if (a[i] != c[i] ) { 
+		if (c[i] != d[i] ) { 
 			std::cout << "ERROR results are not equal" << std::endl;
 			break;
 		}
 	}
-        std::cout << "Results Match" << std::endl;
 	
 /*
 Performing methods to free allocated memory
 */
-	cudaFree(a);
-	cudaFree(b);
-	cudaFree(c);
-	cudaFree(d);
+/*	cudaFree(a);
+	cudaFree(b);*/
+	cudaFree(dev_a);
+	cudaFree(dev_b);
 
-/*	free(a);
+	free(a);
 	free(b);
 	free(c);
 	free(d);
-*/
 	std::cout << "To continue type c, to end press q" << std::endl;
 	std::cin >> check;
 } while(check == 'c');

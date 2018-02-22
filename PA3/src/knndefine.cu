@@ -35,6 +35,15 @@ void randNan(float *a, int N){
     }
     
 }
+
+void copyMatrix(float *a, float *b, int N){
+    for (int i = 0; i < N; ++i){
+        for (int j = 0; j < N; ++j){
+            b[i*N + j] = a[i*N + j];
+        }
+    }
+}
+
 void readCsv(float *a, int numEntry) {
     std::ifstream fin;
     std::string temp;

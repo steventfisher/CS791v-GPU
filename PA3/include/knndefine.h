@@ -11,6 +11,7 @@
 //void readcsv(int *, int *, int);
 void fillMatrices(float *, int);
 void randNan(float *, int);
+void copyMatrix(float *, float *, int);
 void readCsv(float *, int);
 void printMatrix(float *, int);
 void printVector(float *, int);
