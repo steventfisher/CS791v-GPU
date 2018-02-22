@@ -186,8 +186,11 @@ to run the sequential computations on the CPU
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&elapsed_time_cpu, start, stop ); //store the elaspsed time for the cpu
 
+	std::cout << "GPU Addition" << std::endl;
 	printMatrix(c,N);
+	std::cout << "CPU Addition" << std::endl;
 	printMatrix(d,N);
+	std::cout << "GPU Striding Addition" << std::endl;
 	printMatrix(e,N);
 
 	std::cout << "Time needed to calculate the results on the CPU: " << elapsed_time_cpu << " ms." << std::endl;  // print out elapsed time for the cpu
@@ -201,6 +204,7 @@ to run the sequential computations on the CPU
 			break;
 		}
 	}
+	std::cout << "Matrices are equal" << std::endl;
 	
 	//prints out the speedup for the gpu as compared to cpu.
 	std::cout << "Speedup on GPU as compared to CPU without Stride= " << ((float) elapsed_time_cpu / ((float) elapsed_time_gpu + (float) elapsed_mem)) << std::endl;
@@ -228,7 +232,7 @@ Performing methods to free allocated memory
 	cudaEventDestroy(stop_stride);
 	cudaEventDestroy(start_mem_cpy);
 	cudaEventDestroy(stop_mem_cpy);	
-	std::cout << "To continue type c, to end press ctrl-z" << std::endl;
+	std::cout << "To continue type c, to end type q" << std::endl;
 	std::cin >> check;
 } while(check == 'c');
 	return 0;
