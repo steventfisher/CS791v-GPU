@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 import numpy as np
-import pycuda.autoinit
+#import pycuda.autoinit
 from pycuda import driver, compiler, gpuarray, tools
 import pandas as pd
 import random

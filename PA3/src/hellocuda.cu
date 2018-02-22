@@ -16,7 +16,7 @@
 #include "knncpu.h"
 #include "knngpu.h"
 #include "knndefine.h"
-
+#include <algorithm>
 
 int main() {
 /*
@@ -126,7 +126,9 @@ threads per block that will be used on the GPU
 	cudaMemcpy(d, dev_b, N*sizeof(float), cudaMemcpyDeviceToHost);
 	printMatrix(c, N);
 	std::cout << "Array dev_b" << std::endl;
+        std::sort(d, d+N);
 	printVector(d, N);
+
 
 /*
 In this section we will be perofming the necessary steps
@@ -138,7 +140,7 @@ to run the sequential computations on the CPU
 	std::cout << "Corrected A: " << std::endl;
 	printMatrix(a, N);
         std::cout << "GPU Array:" << std::endl;
-	printMatrix(d, N);	
+	printMatrix(c, N);	
 
 
 	std::cout << std::endl; 
