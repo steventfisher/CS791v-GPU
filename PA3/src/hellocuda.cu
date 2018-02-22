@@ -119,7 +119,7 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-/*	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
+	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
 	cudaDeviceSynchronize();
         std::cout << "Array dev_a" << std::endl;
 	cudaMemcpy(c, dev_a, N*N*sizeof(float), cudaMemcpyDeviceToHost);
@@ -127,7 +127,7 @@ threads per block that will be used on the GPU
 	printMatrix(c, N);
 	std::cout << "Array dev_b" << std::endl;
 	printVector(d, N);
-*/
+
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
@@ -137,8 +137,8 @@ to run the sequential computations on the CPU
 	printVector(b, N);
 	std::cout << "Corrected A: " << std::endl;
 	printMatrix(a, N);
-        //std::cout << "Array D" << std::endl;
-	//printMatrix(d, N);	
+        std::cout << "GPU Array:" << std::endl;
+	printMatrix(d, N);	
 
 
 	std::cout << std::endl; 
