@@ -115,7 +115,7 @@ threads per block that will be used on the GPU
 
 	matgpumult<<<Grid,Block>>>(a,b,c,N);
 	cudaDeviceSynchronize();
-        std::cout << "Array C" << std::endl;
+        std::cout << "Array C from GPU" << std::endl;
 	printMatrix(c, N);
 
 /*
@@ -124,7 +124,7 @@ to run the sequential computations on the CPU
 */
 
 	matcpumult(a,b,d,N);		// do calculation on the cpu
-        std::cout << "Array D" << std::endl;
+        std::cout << "Array D from CPU" << std::endl;
 	printMatrix(d, N);	
 
         std::cout << std::endl; 
@@ -136,6 +136,7 @@ to run the sequential computations on the CPU
 			break;
 		}
 	}
+	std::cout << "Matrices are equal" << std::endl;
 	
 /*
 Performing methods to free allocated memory
@@ -150,3 +151,4 @@ Performing methods to free allocated memory
 } while(check == 'c');
 	return 0;
 }
+
