@@ -13,8 +13,8 @@
 
 #include <iostream>
 
-#include "knngpu.h"
 #include "knncpu.h"
+#include "knngpu.h"
 #include "knndefine.h"
 
 
@@ -33,8 +33,8 @@ in our implementation of the matrix addition.
 	int numThreads_block;			// number of threads in a block
 
 	int N = 8;  				// size of array in each dimension
-	char *a;
-	//int *b,*c,*d;
+	float *a,*b,*c,*d;
+	float *dev_a, *dev_b;
 /*
 This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
@@ -80,9 +80,6 @@ do{
 		}
 
 	} while (numThreads_x < N || numThreads_block > 1024);
-	
-	a = (char *) malloc(N*N);
-	readCsv(*a, N);
 
 	dim3 Grid(Grid_Dim_x, Grid_Dim_y);	//Grid structure
 	dim3 Block(Block_Dim_x,Block_Dim_y);	//Number of threads per block.
@@ -94,24 +91,25 @@ Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
 
-/*	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
-	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
-	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
-	//d = (int*) malloc(N * N * sizeof(int));
+	cudaMalloc( (void**) &dev_a, N * N * sizeof(float));
+	cudaMalloc( (void**) &dev_b, N * sizeof(float));
+	a = (float*) malloc(N * N * sizeof(float));
+	b = (float*) malloc(N * sizeof(float));
+	c = (float*) malloc(N * N * sizeof(float));
+	d = (float*) malloc(N * sizeof(float));
 	
 	fillMatrices(a,b,N);			// used to generate the arrays
+	//fillMatrices(c,d,N);
+	cudaMemcpy(dev_a, a, N*N*sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_b, b, N*sizeof(float), cudaMemcpyHostToDevice);
 	
 	std::cout << "Array A" << std::endl;
 	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging
-	std::cout << "Array B" << std::endl;
-	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
-<<<<<<< HEAD
+//	std::cout << "Array B" << std::endl;
+//	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
 
 	
 
-=======
-*/
->>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
 /*
 In this section we will be performing the nececcary steps in
 order to run our computaion on the GPU. The cudaEventCreate is
@@ -121,36 +119,30 @@ used in the matgpuadd function, which used the entered results
 from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
-<<<<<<< HEAD
-/*
-	matgpumult<<<Grid,Block>>>(a,b,c,N);
-	cudaDeviceSynchronize();
-        std::cout << "Array C" << std::endl;
-	printMatrix(c, N);
-*/
-=======
 
-/*	matgpumult<<<Grid,Block>>>(a,b,c,N);
+	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
 	cudaDeviceSynchronize();
-        std::cout << "Array C" << std::endl;
+        std::cout << "Array dev_a" << std::endl;
+	cudaMemcpy(c, dev_a, N*N*sizeof(float), cudaMemcpyDeviceToHost);
+	cudaMemcpy(d, dev_b, N*sizeof(float), cudaMemcpyDeviceToHost);
 	printMatrix(c, N);
-/*
->>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
+	std::cout << "Array dev_b" << std::endl;
+	printVector(d, N);
+
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
-<<<<<<< HEAD
-/*
-	matcpumult(a,b,d,N);		// do calculation on the cpu
-=======
 
-/*	matcpumult(a,b,d,N);		// do calculation on the cpu
->>>>>>> d5737ec5cc4498af54e394c209ce2c2055beb035
-        std::cout << "Array D" << std::endl;
+	knncpu(a,b,N);		// do calculation on the cpu
+	printVector(b, N);
+	std::cout << "Corrected A: " << std::endl;
+	printMatrix(a, N);
+/*        std::cout << "Array D" << std::endl;
 	printMatrix(d, N);	
 
-        std::cout << std::endl; 
+
+	std::cout << std::endl; 
 	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
 
 	for(int i = 0;i < N*N;i++) {  // checking if the matrix from the gpu is the same as cpu
@@ -164,11 +156,14 @@ to run the sequential computations on the CPU
 Performing methods to free allocated memory
 */
 /*	cudaFree(a);
-	cudaFree(b);
-	cudaFree(c);
-	cudaFree(d);
-*/
+	cudaFree(b);*/
+	cudaFree(dev_a);
+	cudaFree(dev_b);
+
 	free(a);
+	free(b);
+	free(c);
+	free(d);
 	std::cout << "To continue type c, to end press q" << std::endl;
 	std::cin >> check;
 } while(check == 'c');

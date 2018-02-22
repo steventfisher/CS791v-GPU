@@ -8,6 +8,6 @@
 
 
 // This is the declaration of the function that will execute on the GPU.
-__global__ void knncpu(int *, int *, int);
+void knncpu(float *, float *, int);
 
 #endif // KNNCPU_H_

@@ -18,7 +18,7 @@ __global__ void matgpuadd_stride(int *a, int *b, int *c, int N) {
   
   for (int i = blockIdx.x * blockDim.x + threadIdx.x;
        i < N;
-       i += blockDim.x + gridDim.x
+       i += blockDim.x * gridDim.x
        ){
 	c[i] =  a[i] + b[i];
   }

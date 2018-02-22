@@ -145,6 +145,7 @@ threads per block that will be used on the GPU
 	cudaEventRecord(start, 0);
 	cudaEventRecord(throughstart, 0); //records the start time for the throughput
 	matgpuadd<<<Grid,Block>>>(dev_a,dev_b,dev_c,N);
+	cudaDeviceSynchronize();
 	cudaEventRecord(throughstop, 0);
 	cudaEventSynchronize(throughstop); //records the stop time for the throughput
 	cudaEventElapsedTime(&through_total, throughstart, throughstop);
@@ -160,6 +161,7 @@ threads per block that will be used on the GPU
 
 	cudaEventRecord(start_stride, 0);
 	matgpuadd_stride<<<Grid,Block>>>(dev_a,dev_b,dev_d,N);
+	cudaDeviceSynchronize();
 	cudaEventRecord(stop_stride, 0);
 	cudaEventSynchronize(stop_stride);
 
@@ -183,6 +185,10 @@ to run the sequential computations on the CPU
 	cudaEventRecord(stop, 0);     	// records the end time end time for cpu calculation
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&elapsed_time_cpu, start, stop ); //store the elaspsed time for the cpu
+
+	printMatrix(c,N);
+	printMatrix(d,N);
+	printMatrix(e,N);
 
 	std::cout << "Time needed to calculate the results on the CPU: " << elapsed_time_cpu << " ms." << std::endl;  // print out elapsed time for the cpu
 

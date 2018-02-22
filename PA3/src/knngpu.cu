@@ -1,29 +1,25 @@
 
 #include "knngpu.h"
 #include <math.h>
+#include <algorithm>
 
-    __global__ void knnGpu(float *A, float *B, int Size)
+    __global__ void knngpu(float *a, float *b, int N)
 {
-    //int x = threadIdx.x + blockIdx.x * blockDim.x;
-    //int y = threadIdx.y + blockIdx.y*blockDim.y;
-    __syncthreads();
-    
-    float tmpdist = 0;
-    for (int i = blockIdx.x*blockDim.x + threadIdx.x; i < Size*Size; i+= blockDim.x*gridDim.x){
-       tmpdist = 0.0;
-       if (A[i] == -99999) {
-           for (int k = 0; k < Size; ++k) {
-               if(k != i){
-                 for (int j = 0; j < Size; ++j) {
-                     tmpdist += 2;
-                 }
-               }
-               __syncthreads();
-               //B[k] = sqrt((float) tmpdist);
-               B[k] = tmpdist;
-            }            
-       }
-    }
-    
-  
+	
+  int i, j, k, l, m;
+  float tmpdst = 0;
+  //int q = 3;
+  //int count = 0;
+  float tmp = 0;
+
+  for(i = threadIdx.x + blockDim.x*blockIdx.x; i < N; i += blockDim.x+gridDim.x){
+      //for(j = 0; j < N; ++j){
+          a[i] = i;
+          /*if(a[i*N + j] == -99999){
+	  	   b[i*N] += 1;
+	      
+	  }*/
+      //}
+      
+  }
 }

@@ -8,8 +8,9 @@
 
 
 // This is the declaration of the function that will execute on the GPU.
-void fillMatrices(int *, int *, int);
+//void readcsv(int *, int *, int);
+void fillMatrices(float *, float *, int);
 void readCsv(char *, int);
-void printMatrix(int *, int);
-
+void printMatrix(float *, int);
+void printVector(float *, int);
 #endif // KNNDEFINE_H_
