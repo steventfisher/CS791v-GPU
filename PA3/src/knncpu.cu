@@ -2,7 +2,6 @@
 #include "knncpu.h"
 #include <math.h>
 #include <iostream>
-#include <algorithm>
 
 void knncpu(float *a, float *b, int N) {
 
@@ -15,7 +14,7 @@ void knncpu(float *a, float *b, int N) {
   for(i = 0; i < N; ++i){
       for(j = 0; j < N; ++j){
           if(a[i*N + j] == -99999){
-	      std::cout << "Found" << std::endl;
+//	      std::cout << "Found" << std::endl;
 	      for(k = 0; k < N; ++k){
 	          tmp = 0;
 	          for(l = 2; l < N; ++l){
@@ -24,7 +23,17 @@ void knncpu(float *a, float *b, int N) {
 		  b[k] = sqrt(tmp);
 	      }
 //	      std::cout << "tmp: " << tmp << std::endl;
-	      std::sort(b, b + N);
+//	      std::sort(b, b + N);
+              tmpdst = 0;
+	      for(k = 0; k < N; ++k){
+	         for(l = 0; l < N; ++l){
+                    if (b[l] < b[k]){
+		       tmpdst = b[k];
+                       b[k] = b[j];
+                       b[j] = tmpdst;
+		    }
+	         }
+	      }
 	      tmpdst = 0;
 	      for(m = 0; m < N; ++m){
 	          if(b[m] != 0 && count < q){

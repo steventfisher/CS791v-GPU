@@ -34,6 +34,9 @@ in our implementation of the matrix addition.
 
 	int N = 8;  				// size of array in each dimension
 	float *a,*b,*c,*d;
+        cudaEvent_t start, stop, cpu_start, cpu_stop;                     // using cuda events to measure time
+        float elapsed_time_gpu, elapsed_time_cpu;
+
 /*
 This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
@@ -96,13 +99,13 @@ order to populate our two matrices.
         cudaMallocManaged( (void**) &d, N * sizeof(float));
 
 	readCsv(a, N);
-	std::cout << "Mat A" << std::endl;
-	printMatrix(a, N);     // used to display matrix A after reading CSV
+//	std::cout << "Mat A" << std::endl;
+//	printMatrix(a, N);     // used to display matrix A after reading CSV
 	randNan(a, N);
 	copyMatrix(a, c, N);
-	std::cout << "Modified A" << std::endl;
-	printMatrix(a, N);     // used to display matrix A after modifying values in column 2
-        printMatrix(c,N);
+//	std::cout << "Modified A" << std::endl;
+//	printMatrix(a, N);     // used to display matrix A after modifying values in column 2
+//      printMatrix(c,N);
 	fillMatrices(b,N);			// used to generate the arrays
 
 /*
@@ -114,9 +117,22 @@ used in the matgpuadd function, which used the entered results
 from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
-
+	cudaEventCreate(&start);                // Creates the event for the start timer
+        cudaEventCreate(&stop);                 // Creates the event for the stop timer
+	cudaEventCreate(&cpu_start);
+	cudaEventCreate(&cpu_stop);
+	
+	std::cout << "Starting GPU Calculation" << std::endl;
+        cudaEventRecord(start, 0);
 	knngpu<<<Grid,Block>>>(c,d,N);
 	cudaDeviceSynchronize();
+        cudaEventRecord(stop, 0);       // records the stop time
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&elapsed_time_gpu, start, stop ); //stores the elapsed time for the gpu
+
+
+
+
 /*        std::cout << "Array GPU A" << std::endl;
 	printMatrix(c, N);
 	std::cout << "Array " << std::endl;
@@ -127,17 +143,25 @@ threads per block that will be used on the GPU
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
 */
+	
+	std::cout << "Starting CPU Calculations" << std::endl;
+	cudaEventRecord(cpu_start, 0);      // records the start time
 
 	knncpu(a,b,N);		// do calculation on the cpu
+
+        cudaEventRecord(cpu_stop, 0);       // records the end time end time for cpu calculation
+        cudaEventSynchronize(cpu_stop);
+        cudaEventElapsedTime(&elapsed_time_cpu, cpu_start, cpu_stop ); //store the elaspsed time for the cpu
+
 //	printVector(b, N);
-	std::cout << "Corrected A: " << std::endl;
-	printMatrix(a, N);
-        std::cout << "GPU Array:" << std::endl;
-	printMatrix(c, N);	
+//	std::cout << "CPU Array: " << std::endl;
+//	printMatrix(a, N);
+//      std::cout << "GPU Array:" << std::endl;
+//	printMatrix(c, N);	
 
 
 	std::cout << std::endl; 
-	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
+/*	std::cout << "Checking if the results from the cpu calculation = gpu  calculation" << std::endl;
 
 	for(int i = 0;i < N*N;i++) {  // checking if the matrix from the gpu is the same as cpu
 		if (a[i] != c[i] ) { 
@@ -146,6 +170,12 @@ to run the sequential computations on the CPU
 		}
 	}
         std::cout << "Results Match" << std::endl;
+*/
+	std::cout << std::endl;
+	std::cout << "Time needed to calculate the results on the GPU: " << elapsed_time_gpu << " ms." << std::endl;  // print out elapsed time for gpu
+        std::cout << "Throughput for gpu: " << N * N * elapsed_time_gpu * 1000 << " calculations per second" << std::endl; // print out throughput for gpu.
+        std::cout << "Time needed to calculate the results on the CPU: " << elapsed_time_cpu << " ms." << std::endl;  // print out elapsed time for the cpu
+	std::cout << "Speedup on GPU as compared to CPU = " << ((float) elapsed_time_cpu / (float) elapsed_time_gpu) << std::endl;
 	
 /*
 Performing methods to free allocated memory
@@ -154,6 +184,11 @@ Performing methods to free allocated memory
 	cudaFree(b);
 	cudaFree(c);
 	cudaFree(d);
+
+	cudaEventDestroy(start);
+        cudaEventDestroy(stop);
+	cudaEventDestroy(cpu_start);
+	cudaEventDestroy(cpu_stop);
 
 /*	free(a);
 	free(b);

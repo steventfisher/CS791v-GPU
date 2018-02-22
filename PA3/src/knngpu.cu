@@ -10,6 +10,7 @@ __global__ void knngpu(float *a, float *b, int N)
   int q = 5;
   int count = 0;
   float tmp = 0;
+  __syncthreads();
 
   for(i = threadIdx.x + blockDim.x*blockIdx.x; i < N; i += blockDim.x*gridDim.x){
       for(j = threadIdx.y + blockDim.x * blockIdx.y; j < N; j += blockDim.y*gridDim.y){
@@ -45,4 +46,5 @@ __global__ void knngpu(float *a, float *b, int N)
       }
       
   }
+  __syncthreads();
 }
