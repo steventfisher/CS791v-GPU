@@ -8,7 +8,7 @@ void knncpu(float *a, float *b, int N) {
 
   int i, j, k, l, m;
   float tmpdst = 0;
-  int q = 3;
+  int q = 5;
   int count = 0;
   float tmp = 0;
 

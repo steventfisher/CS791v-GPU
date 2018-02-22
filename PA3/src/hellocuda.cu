@@ -97,18 +97,17 @@ order to populate our two matrices.
 	b = (float*) malloc(N * sizeof(float));
 	c = (float*) malloc(N * N * sizeof(float));
 	d = (float*) malloc(N * sizeof(float));
-	
-	fillMatrices(a,b,N);			// used to generate the arrays
+
+	readCsv(a, N);
+	std::cout << "Mat A" << std::endl;
+	printMatrix(a, N);     // used to display matrix A after reading CSV
+	randNan(a, N);
+	std::cout << "Modified A" << std::endl;
+	printMatrix(a, N);     // used to display matrix A after modifying values in column 2
+	fillMatrices(b,N);			// used to generate the arrays
 	//fillMatrices(c,d,N);
 	cudaMemcpy(dev_a, a, N*N*sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_b, b, N*sizeof(float), cudaMemcpyHostToDevice);
-	
-	std::cout << "Array A" << std::endl;
-	printMatrix(a, N);			// used to display matrix A, used in order to verify what was in the matrix for debugging
-//	std::cout << "Array B" << std::endl;
-//	printMatrix(b, N);			// used to display matrix B, used in order to verify what was in the matrix for debugging
-
-	
 
 /*
 In this section we will be performing the nececcary steps in
@@ -120,7 +119,7 @@ from before, to specify the number of blocks and the number of
 threads per block that will be used on the GPU
 */
 
-	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
+/*	knngpu<<<Grid,Block>>>(dev_a,dev_b,N);
 	cudaDeviceSynchronize();
         std::cout << "Array dev_a" << std::endl;
 	cudaMemcpy(c, dev_a, N*N*sizeof(float), cudaMemcpyDeviceToHost);
@@ -128,7 +127,7 @@ threads per block that will be used on the GPU
 	printMatrix(c, N);
 	std::cout << "Array dev_b" << std::endl;
 	printVector(d, N);
-
+*/
 /*
 In this section we will be perofming the necessary steps
 to run the sequential computations on the CPU
@@ -138,8 +137,8 @@ to run the sequential computations on the CPU
 	printVector(b, N);
 	std::cout << "Corrected A: " << std::endl;
 	printMatrix(a, N);
-/*        std::cout << "Array D" << std::endl;
-	printMatrix(d, N);	
+        //std::cout << "Array D" << std::endl;
+	//printMatrix(d, N);	
 
 
 	std::cout << std::endl; 
@@ -151,7 +150,7 @@ to run the sequential computations on the CPU
 			break;
 		}
 	}
-*/	
+	
 /*
 Performing methods to free allocated memory
 */
