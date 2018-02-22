@@ -12,14 +12,13 @@
   //int count = 0;
   float tmp = 0;
 
-  for(i = threadIdx.x + blockDim.x*blockIdx.x; i < N; i += blockDim.x+gridDim.x){
-      //for(j = 0; j < N; ++j){
-          a[i] = i;
-          /*if(a[i*N + j] == -99999){
-	  	   b[i*N] += 1;
+  for(i = threadIdx.x + blockDim.x*blockIdx.x; i < N; i += blockDim.x*gridDim.x){
+      for(j = threadIdx.y + blockDim.x * blockIdx.y; j < N; j += blockDim.y*gridDim.y){
+          if(a[i*N + j] == -99999){
+              b[0] += 1;
 	      
-	  }*/
-      //}
+	  }
+      }
       
   }
 }
