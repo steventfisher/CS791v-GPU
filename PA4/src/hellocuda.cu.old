@@ -40,6 +40,10 @@ specify the size of the matrices, the number of blocks used and the
 number of threads per block to use.
 */
 do{
+	std::cout << "Maximum number of threads per block = 1024" << std::endl;
+	std::cout << "Maximum sizes of the x and y dimensions of the thread block = 1024" << std::endl;
+	std::cout << "Maximum size of each dimension of grid of thread blocks = 65535" << std::endl;
+
 	do {
 	   std::cout << "Enter the value(size of matrix) for N (N <= 20000): ";
 	   std::cin >> N;
@@ -85,14 +89,8 @@ for the matrices in both the cpu and gpu calculations.
 Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
-	//multiGPU
-	int numGPU;
-	cudaGetDeviceCount(&numGPU);
-	DataStruct * tempData = new DataStruct[numGPU];
-	DataStructD * tempDataD = new DataStructD[numGPU];
-	CUTThread * thread = new CUTThread[numGPU];
-	std::cout << "There are " << numGPU << " GPU in this machine" << std::endl;
- 	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
+
+	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &d, N * N * sizeof(int));

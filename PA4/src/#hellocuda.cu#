@@ -89,10 +89,9 @@ order to populate our two matrices.
 	int numGPU;
 	cudaGetDeviceCount(&numGPU);
 	DataStruct * tempData = new DataStruct[numGPU];
-	DataStructD * tempDataD = new DataStructD[numGPU];
 	CUTThread * thread = new CUTThread[numGPU];
 	std::cout << "There are " << numGPU << " GPU in this machine" << std::endl;
- 	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
+	cudaMallocManaged( (void**) &a, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &b, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &c, N * N * sizeof(int));
 	cudaMallocManaged( (void**) &d, N * N * sizeof(int));
