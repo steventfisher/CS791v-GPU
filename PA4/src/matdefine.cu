@@ -14,6 +14,16 @@ void fillMatrices(int *a, int *b, int N) {
 	}
 }
 
+void fillZero(int *a, int N) {
+
+	int rows, columns;
+
+	for(rows=0; rows < N; rows++)		// load arrays with some numbers
+	   for(columns=0; columns < N; columns++) {
+		a[rows * N + columns] = 0;
+	}
+}
+
 void printMatrix(int *h, int N) {
 
 	std::cout << "Array, every N/8 numbers, eight numbers, N => 8" << std::endl;

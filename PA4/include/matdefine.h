@@ -9,6 +9,7 @@
 
 // This is the declaration of the function that will execute on the GPU.
 void fillMatrices(int *, int *, int);
+void fillZero(int *, int);
 void printMatrix(int *, int);
 
 #endif // MATDEFINE_H_
