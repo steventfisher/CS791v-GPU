@@ -177,7 +177,7 @@ order to populate our two matrices.
 
 	printMatrix(dataMult.c[0], N);
 	
-	fillZeros(d, N);
+	fillZero(d, N);
 	
 
 /*
