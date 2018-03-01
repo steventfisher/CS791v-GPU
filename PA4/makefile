@@ -1,7 +1,7 @@
 # Point to includes of local directories
 CC=/usr/local/cuda-9.0/bin/nvcc
 INCLUDES=-I../include
-O_FILES=hellocuda.o matdefine.o matgpumult.o matcpumult.o matgpuadd.o matgpuadd.o
+O_FILES=hellocuda.o matdefine.o matgpumult.o matcpumult.o matgpuadd.o matcpuadd.o
 
 all: $(O_FILES)
 	$(CC) -o PA4 $(O_FILES)

@@ -23,6 +23,8 @@
 struct MatMultStruct
 {
 	int deviceID;
+	int Grid;
+	int Block;
 	int size;
 	int *a;
 	int *b;
@@ -32,6 +34,8 @@ struct MatMultStruct
 struct MatAddStruct
 {
 	int deviceID;
+	int Grid;
+	int Block;
 	int size;
 	int *a;
 	int *b;
@@ -42,15 +46,16 @@ void* routineM(void *pvoidData)
 {
 	MatMultStruct *data = (MatMultStruct*)pvoidData;
 	cudaSetDevice(data->deviceID);
-	matgpumult<<<Grid,Block>>>(a,b,c,N);
+	matgpumult<<<data->Grid,data->Block>>>(data->a,data->b,data->c,data->size);
 	cudaDeviceSynchronize();
 	return 0;
 }
+
 void* routine(void *pvoidData)
 {
 	MatAddStruct *data = (MatAddStruct*)pvoidData;
 	cudaSetDevice(data->deviceID);
-	matgpuadd<<<Grid,Block>>>(a,b,c,N);
+	matgpuadd<<<data->Grid,data->Block>>>(data->a,data->b,data->c,data->size);
 	cudaDeviceSynchronize();
 	return 0;
 }
@@ -71,6 +76,7 @@ in our implementation of the matrix addition.
 
 	int N = 8;  				// size of array in each dimension
 	int numMat = 1;
+	//int numMult = 1;
 	int *a,*b,*c,*d,*e,*f;
 /*
 This section specifies the size limitations and allows the user to
@@ -132,12 +138,12 @@ Here we will also be using fillMatrices from matdefine in
 order to populate our two matrices.
 */
 	//Allocating Memory for matrices
- 	cudaMallocManaged( (void**) &a, numMult * N * N * sizeof(int));
-	cudaMallocManaged( (void**) &b, numMult * N * N * sizeof(int));
-	cudaMallocManaged( (void**) &c, numMult * N * N * sizeof(int));
-	cudaMallocManaged( (void**) &d, numMult * N * N * sizeof(int));
-	cudaMallocManaged( (void**) &e, numMult * N * N * sizeof(int));
-	cudaMallocManaged( (void**) &f, numMult * N * N * sizeof(int));	
+ 	cudaMallocManaged( (void**) &a, numMat * N * N * sizeof(int));
+	cudaMallocManaged( (void**) &b, numMat * N * N * sizeof(int));
+	cudaMallocManaged( (void**) &c, numMat * N * N * sizeof(int));
+	cudaMallocManaged( (void**) &d, numMat * N * N * sizeof(int));
+	cudaMallocManaged( (void**) &e, numMat * N * N * sizeof(int));
+	cudaMallocManaged( (void**) &f, numMat * N * N * sizeof(int));	
 	
 	//multiGPU
 	int numGPU;
@@ -151,20 +157,23 @@ order to populate our two matrices.
 	    for(int j = 0; j < numGPU; ++j){
     	        fillMatrices(a,b,N);	// used to generate the arrays, found in matdefine.cu
 		fillZero(c, N);
-		dataMult[i].deviceID = j;
-		dataMult[i].size = N * N * size(int);
-		dataMult[i].a = a + i * (N/numMult);
-		dataMult[i].b = b + i * (N/numMult);
-		dataMult[i].c = c + i * (N/numMult);
+		printMatrix(a,N);
+		dataMult[i].deviceID = 0;
+		dataMult[i].size = N * N * sizeof(int);
+		dataMult[i].a = a + i * (N/numMat);
+		dataMult[i].b = b + i * (N/numMat);
+		dataMult[i].c = c + i * (N/numMat);
 	    }
 	}
 
 	CUTThread thread = start_thread( routineM, &(dataMult[0]));
 	for(int i = 1; i < numMat/2; ++i){
-	    routine( &(dataMult[i]));
+	    routineM( &(dataMult[i]));
 	}
 
 	end_thread(thread);
+
+	printMatrix(c,N);
 	
 	//fillMatrices(d,e,N);
 	
