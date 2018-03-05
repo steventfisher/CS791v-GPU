@@ -112,7 +112,7 @@ order to populate our two matrices.
 	std::cout << "There are " << numGPU << " GPU in this machine" << std::endl;
 	
 	for(int i = 0; i < numMat/2; ++i){
-	    for(int j = 0; j < numGPU; ++j){
+	    //for(int j = 0; j < numGPU; ++j){
     	        fillMatrices(a,b,Size);	// used to generate the arrays, found in matdefine.cu
 		fillZero(c, Size);
 		printMatrix(a,Size);
@@ -121,7 +121,7 @@ order to populate our two matrices.
 		dataMult[i].a = a + i * (Size/numMat);
 		dataMult[i].b = b + i * (Size/numMat);
 		dataMult[i].c = c + i * (Size/numMat);
-	    }
+	    //}
 	}
 
 	/*CUTThread thread = start_thread( routineM, &(dataMult[0]));
