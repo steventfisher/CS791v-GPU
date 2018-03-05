@@ -175,7 +175,7 @@ order to populate our two matrices.
 
 	end_thread(thread);
 
-	printMatrix(dataMult.c[0], N);
+	//printMatrix(dataMult.c[0], N);
 	
 	fillZero(d, N);
 	
