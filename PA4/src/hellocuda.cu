@@ -66,16 +66,16 @@ This section is for the declaration of the variables that will be used
 in our implementation of the matrix addition.
 */
 
-	char check;
+	//char check;
 
-	int Grid_Dim_x=1, Grid_Dim_y=1;		//Grid structure values
-	int Block_Dim_x=1, Block_Dim_y=1;	//Block structure values
+	int Grid_Dim_x=32, Grid_Dim_y=32;		//Grid structure values
+	int Block_Dim_x=32, Block_Dim_y=32;	//Block structure values
 
-	int numThreads_x;  			// number of threads available in device, each dimension
-	int numThreads_block;			// number of threads in a block
+	//int numThreads_x;  			// number of threads available in device, each dimension
+	//int numThreads_block;			// number of threads in a block
 
-	int N = 8;  				// size of array in each dimension
-	int numMat = 1;
+	int N = 100;  				// size of array in each dimension
+	int numMat = 4;
 	//int numMult = 1;
 	int Size = 0;
 	int *a,*b,*c,*d,*e,*f;
@@ -84,50 +84,6 @@ This section specifies the size limitations and allows the user to
 specify the size of the matrices, the number of blocks used and the
 number of threads per block to use.
 */
-do{
-	do {
-	   std::cout << "Enter the value(size of matrix) for N (N <= 20000): ";
-	   std::cin >> N;
-
-	   if (N < 10) {
-	      std::cout << "Error -- N has to be greater than 10!" << std::endl;
-	   }
-	   else if (N > 20000) {
- 	      std::cout << "Error -- N has to be less than or equal to 20000!" << std::endl;
-	   }
-	} while ( N < 10 || N > 20000);
-
-	do {
-	   std::cout << "Enter the number of matrices to use (multiple of 2): ";
-	   std::cin >> numMat;
-	   if (numMat %2 != 0){
-	      std::cout << "The number of matrices needs to be an even number." << std::endl;
-	   }
-	} while (numMat %2 != 0);
-	
-	do {//Using a do while loop, since we want it to run at least once.
-		std::cout << "Enter number of blocks per grid that will be used in both the x and y dimensions: ";
-		std::cin >> Grid_Dim_x;
-
-		Grid_Dim_y = Grid_Dim_x;  // square grid
-
-		std::cout << "Enter number of threads that will used per block in both the x and y dimensions, currently " << Block_Dim_x << " (Needs to be < 32): ";
-		std::cin >> Block_Dim_x;
-
-		Block_Dim_y = Block_Dim_x;	//square blocks
-
-		numThreads_x = Grid_Dim_x * Block_Dim_x;		// total number of threads in x dimension
-		
-		numThreads_block = Block_Dim_x * Block_Dim_y;	// number of threads in a block
-
-		if (numThreads_x < N) {
-		   std::cout <<"Error -- number of threads in the x or y dimensions is less than thenumber of elements in matrix!" << std::endl;
-		}
-		else if (numThreads_block > 1024) {
-		     std::cout << "Error -- there are too many threads in block!" << std::endl;
-		}
-
-	} while (numThreads_x < N || numThreads_block > 1024);
 
 	dim3 Grid(Grid_Dim_x, Grid_Dim_y);	//Grid structure
 	dim3 Block(Block_Dim_x,Block_Dim_y);	//Number of threads per block.
@@ -168,13 +124,13 @@ order to populate our two matrices.
 	    }
 	}
 
-	CUTThread thread = start_thread( routineM, &(dataMult[0]));
+	/*CUTThread thread = start_thread( routineM, &(dataMult[0]));
 	for(int i = 1; i < numMat/2; ++i){
 	    routineM( &(dataMult[i]));
 	}
 
 	end_thread(thread);
-
+	*/
 	//printMatrix(dataMult.c[0], N);
 	
 	fillZero(d, N);
@@ -225,9 +181,6 @@ Performing methods to free allocated memory
 	cudaFree(e);
 	cudaFree(f);
 
-	std::cout << "To continue type c, to end press q" << std::endl;
-	std::cin >> check;
-} while(check == 'c');
 	return 0;
 }
 
